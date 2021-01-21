@@ -105,7 +105,7 @@ func endpointSessionCreate(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if price < 300 {
+	if price < 100 {
 		writeError(w, http.StatusBadRequest, "Price too low")
 		return
 	}

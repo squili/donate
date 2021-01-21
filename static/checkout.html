@@ -32,7 +32,7 @@
             <label for="fortune">Fortune:</label>
             <textarea type="text" id="fortune" rows="1"></textarea>
             <br>
-            <input autocomplete="off" type="text" value="$3.00" class="currency" id="currency" pattern="\d*">
+            <input autocomplete="off" type="text" value="$1.00" class="currency" id="currency" pattern="\d*">
             <button class="checkout-button" id="checkout-button">Purchase</button>
         </div>
         <div class="footer">
@@ -53,8 +53,8 @@
         
         currencyInput.addEventListener("blur", (event) => {
             let val = roundTo(event.target.value, 2)
-            if(val < 3) {
-                val = 3
+            if(val < 1) {
+                val = 1
             }
             event.target.value = "$" + val.toFixed(2);
         })
