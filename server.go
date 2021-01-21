@@ -29,6 +29,7 @@ type configStructure struct {
 	} `yaml:"host"`
 	Discord struct {
 		Webhook string `yaml:"webhook"`
+		Contact string `yaml:"contact"`
 	} `yaml:"discord"`
 }
 
@@ -276,6 +277,7 @@ func main() {
 	http.HandleFunc("/webhook", endpointWebhookCallback)
 	http.Handle("/", newStaticTemplateExecuter(templateCheckout, map[string]string{
 		"StripeKey": config.Key.Publishable,
+		"Contact":   config.Discord.Contact,
 	}))
 	http.Handle("/cancel", newStaticTemplateExecuter(templateCancel, map[string]string{
 		"CheckoutPage": config.Host.Domain,

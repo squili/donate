@@ -13,6 +13,13 @@
             .currency {
                 text-align: right;
             }
+            .footer {
+                position: fixed;
+                left: 0;
+                bottom: 0;
+                width: 100%;
+                text-align: center;
+            }
         </style>
     </head>
     <body>
@@ -27,6 +34,9 @@
             <br>
             <input autocomplete="off" type="text" value="$3.00" class="currency" id="currency">
             <button class="checkout-button" id="checkout-button">Purchase</button>
+        </div>
+        <div class="footer">
+            <p>Contact: <code>{{.Contact}}</code> on <a href="https://discord.com">Discord</a></p>
         </div>
     </body>
     <script type="text/javascript">
