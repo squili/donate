@@ -110,6 +110,10 @@ func endpointSessionCreate(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	if price > 100000 {
+		writeError(w, http.StatusBadRequest, "Price too high")
+	}
+
 	if len(requestData.Name) > 300 {
 		writeError(w, http.StatusBadRequest, "Name too long")
 		return

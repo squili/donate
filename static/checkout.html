@@ -41,20 +41,23 @@
     </body>
     <script type="text/javascript">
         function roundTo(number, significance) {
-            return Math.round(number * Math.pow(10, significance)) / Math.pow(10, significance)
+            return Math.round(number * Math.pow(10, significance)) / Math.pow(10, significance);
         }
 
         // price input
         var currencyInput = document.getElementById("currency");
 
         currencyInput.addEventListener("focus", (event) => {
-            event.target.value = event.target.value.slice(1)
+            event.target.value = event.target.value.slice(1);
         })
         
         currencyInput.addEventListener("blur", (event) => {
-            let val = roundTo(event.target.value, 2)
+            let val = roundTo(event.target.value, 2);
             if(val < 1) {
-                val = 1
+                val = 1;
+            }
+            if(val > 1000) {
+                val = 1000;
             }
             event.target.value = "$" + val.toFixed(2);
         })
@@ -62,12 +65,12 @@
         // text input
         function maxLength(number) {
             return (event) => {
-                event.target.value = event.target.value.slice(0, number)
+                event.target.value = event.target.value.slice(0, number);
             }
         }
 
-        document.getElementById("name").addEventListener("blur", maxLength(300))
-        document.getElementById("fortune").addEventListener("blur", maxLength(3000))
+        document.getElementById("name").addEventListener("blur", maxLength(300));
+        document.getElementById("fortune").addEventListener("blur", maxLength(3000));
 
         // stripe
         var stripe = Stripe("{{.StripeKey}}");
@@ -87,7 +90,7 @@
                 })
                 .then(function(response) {
                     if(response.error != undefined) {
-                        alert(response.error)
+                        alert(response.error);
                     } else {
                         return stripe.redirectToCheckout({ sessionId: response.SessionID });
                     }
