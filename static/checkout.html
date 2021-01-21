@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Fortune</title>
+        <script src="https://polyfill.io/v3/polyfill.min.js?version=3.52.1&features=fetch"></script>
+        <script src="https://js.stripe.com/v3/"></script>
+        <style>
+            .container {
+                margin-left: auto;
+                margin-right: auto;
+                text-align: center;
+            }
+            .currency {
+                text-align: right;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Fortune telling</h1>
+            <p>Pay what you want</p>
+            <label for="name">Name:</label>
+            <input type="text" id="name">
+            <br>
+            <label for="fortune">Fortune:</label>
+            <textarea type="text" id="fortune" rows="1"></textarea>
+            <br>
+            <input autocomplete="off" type="text" value="$3.00" class="currency" id="currency">
+            <button class="checkout-button" id="checkout-button">Purchase</button>
+        </div>
+    </body>
+    <script type="text/javascript">
+        function roundTo(number, significance) {
+            return Math.round(number * Math.pow(10, significance)) / Math.pow(10, significance)
+        }
+
+        // price input
+        var currencyInput = document.getElementById("currency");
+
+        currencyInput.addEventListener("focus", (event) => {
+            event.target.value = event.target.value.slice(1)
+        })
+        
+        currencyInput.addEventListener("blur", (event) => {
+            let val = roundTo(event.target.value, 2)
+            if(val < 3) {
+                val = 3
+            }
+            event.target.value = "$" + val.toFixed(2);
+        })
+
+        // text input
+        function maxLength(number) {
+            return (event) => {
+                event.target.value = event.target.value.slice(0, number)
+            }
+        }
+
+        document.getElementById("name").addEventListener("blur", maxLength(300))
+        document.getElementById("fortune").addEventListener("blur", maxLength(3000))
+
+        // stripe
+        var stripe = Stripe("{{.StripeKey}}");
+        var checkoutButton = document.getElementById("checkout-button");
+
+        checkoutButton.addEventListener("click", function () {
+            fetch("/session", {
+                method: "POST",
+                body: JSON.stringify({
+                    Price: Math.round(currencyInput.value.slice(1) * 100).toString(),
+                    Name: document.getElementById("name").value,
+                    Fortune: document.getElementById("fortune").value
+                })
+            }) // look at this promise chaining garbage lol
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(response) {
+                    if(response.error != undefined) {
+                        alert(response.error)
+                    } else {
+                        return stripe.redirectToCheckout({ sessionId: response.SessionID });
+                    }
+                })
+                .then(function (result) {
+                    if (result.error) {
+                        alert(result.error.message);
+                    }
+                })
+                .catch(function (error) {
+                    console.error("Error: ", error);
+                })
+        })
+    </script>
+</html>

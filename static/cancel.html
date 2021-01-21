@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Cancelled</title>
+        <style>
+            body {
+                text-align: center;
+                padding-top: 30vh;
+            }
+        </style>
+    </head>
+    <body>
+        <p>Payment cancelled. Redirecting back to checkout...</p>
+    </body>
+    <script>
+        setTimeout(() => {
+            window.location.href = "{{.CheckoutPage}}"
+        }, 1000);
+    </script>
+</html>

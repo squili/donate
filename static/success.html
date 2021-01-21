@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Success!</title>
+        <style>
+            body {
+                text-align: center;
+                padding-top: 30vh;
+            }
+        </style>
+    </head>
+    <body>
+        <p>Success! Thanks for your purchase.</p>
+    </body>
+    <script>
+        setTimeout(() => {
+            window.location.href = "{{.CheckoutPage}}"
+        }, 1000);
+    </script>
+</html>
