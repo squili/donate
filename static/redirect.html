@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Cancelled</title>
+        <title>{{.Title}}</title>
         <style>
             body {
                 text-align: center;
@@ -10,7 +10,7 @@
         </style>
     </head>
     <body>
-        <p>Payment cancelled. Redirecting back to checkout...</p>
+        <p>{{.Message}}</p>
     </body>
     <script>
         setTimeout(() => {

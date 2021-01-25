@@ -52,8 +52,7 @@ func loadTemplate(name string) *template.Template {
 }
 
 var templateCheckout = loadTemplate("checkout")
-var templateCancel = loadTemplate("cancel")
-var templateSuccess = loadTemplate("success")
+var templateRedirect = loadTemplate("redirect")
 
 type genericError struct {
 	Error string `json:"error"`
@@ -72,7 +71,7 @@ func writeError(w http.ResponseWriter, statusCode int, message string) {
 type sessionCreateRequest struct {
 	Price   string
 	Name    string
-	Fortune string
+	Message string
 }
 
 type sessionCreateResponse struct {
@@ -119,8 +118,8 @@ func endpointSessionCreate(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if len(requestData.Fortune) > 3000 {
-		writeError(w, http.StatusBadRequest, "Fortune too long")
+	if len(requestData.Message) > 3000 {
+		writeError(w, http.StatusBadRequest, "Message too long")
 		return
 	}
 
@@ -133,7 +132,7 @@ func endpointSessionCreate(w http.ResponseWriter, req *http.Request) {
 				PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
 					Currency: stripe.String(string(stripe.CurrencyUSD)),
 					ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{
-						Name: stripe.String("Fortune Telling"),
+						Name: stripe.String("Donation"),
 					},
 					UnitAmount: stripe.Int64(int64(price)),
 				},
@@ -146,7 +145,7 @@ func endpointSessionCreate(w http.ResponseWriter, req *http.Request) {
 	}
 
 	params.AddMetadata("name", requestData.Name)
-	params.AddMetadata("fortune", requestData.Fortune)
+	params.AddMetadata("message", requestData.Message)
 
 	session, err := session.New(params)
 	if err != nil {
@@ -209,7 +208,7 @@ func endpointWebhookCallback(w http.ResponseWriter, req *http.Request) {
 		return // not interested
 	}
 
-	fortune, exists := checkoutSession.Metadata["fortune"]
+	message, exists := checkoutSession.Metadata["message"]
 	if !exists {
 		return // not interested
 	}
@@ -221,7 +220,7 @@ func endpointWebhookCallback(w http.ResponseWriter, req *http.Request) {
 		Embeds: make([]discordEmbed, 0),
 	}
 	webhookStructure.Embeds = append(webhookStructure.Embeds, discordEmbed{
-		Title:  "New Request",
+		Title:  "New Donation",
 		Color:  0x00cc00,
 		Fields: make([]discordField, 0),
 	})
@@ -229,8 +228,8 @@ func endpointWebhookCallback(w http.ResponseWriter, req *http.Request) {
 		Name:  "Name",
 		Value: username,
 	}, discordField{
-		Name:  "Fortune",
-		Value: fortune,
+		Name:  "Message",
+		Value: message,
 	})
 	if includePrice {
 		webhookStructure.Embeds[0].Fields = append(webhookStructure.Embeds[0].Fields, discordField{
@@ -283,11 +282,15 @@ func main() {
 		"StripeKey": config.Key.Publishable,
 		"Contact":   config.Discord.Contact,
 	}))
-	http.Handle("/cancel", newStaticTemplateExecuter(templateCancel, map[string]string{
+	http.Handle("/cancel", newStaticTemplateExecuter(templateRedirect, map[string]string{
 		"CheckoutPage": config.Host.Domain,
+		"Title":        "Cancelled",
+		"Message":      "Payment cancelled. Redirecting back to checkout...",
 	}))
-	http.Handle("/success", newStaticTemplateExecuter(templateSuccess, map[string]string{
+	http.Handle("/success", newStaticTemplateExecuter(templateRedirect, map[string]string{
 		"CheckoutPage": config.Host.Domain,
+		"Title":        "Success",
+		"Message":      "Thanks for the donation!",
 	}))
 
 	log.Printf("Listening on %s\n", config.Host.Domain)

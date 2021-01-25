@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Fortune</title>
+        <title>Donations</title>
         <script src="https://polyfill.io/v3/polyfill.min.js?version=3.52.1&features=fetch"></script>
         <script src="https://js.stripe.com/v3/"></script>
         <style>
@@ -24,13 +24,13 @@
     </head>
     <body>
         <div class="container">
-            <h1>Fortune telling</h1>
-            <p>Pay what you want</p>
+            <h1>Squili's Donation Portal</h1>
+            <p>Goes to development of: <a href="git.squi.live/squili/shaak">Shaak</a>, Feudal, and Towntime</p>
             <label for="name">Name:</label>
             <input type="text" id="name">
             <br>
-            <label for="fortune">Fortune:</label>
-            <textarea type="text" id="fortune" rows="1"></textarea>
+            <label for="message">Message:</label>
+            <textarea type="text" id="message" rows="1"></textarea>
             <br>
             <input autocomplete="off" type="text" value="$1.00" class="currency" id="currency" pattern="\d*">
             <button class="checkout-button" id="checkout-button">Purchase</button>
@@ -70,7 +70,7 @@
         }
 
         document.getElementById("name").addEventListener("blur", maxLength(300));
-        document.getElementById("fortune").addEventListener("blur", maxLength(3000));
+        document.getElementById("message").addEventListener("blur", maxLength(3000));
 
         // stripe
         var stripe = Stripe("{{.StripeKey}}");
@@ -82,7 +82,7 @@
                 body: JSON.stringify({
                     Price: Math.round(currencyInput.value.slice(1) * 100).toString(),
                     Name: document.getElementById("name").value,
-                    Fortune: document.getElementById("fortune").value
+                    Message: document.getElementById("message").value
                 })
             }) // look at this promise chaining garbage lol
                 .then(function(response) {

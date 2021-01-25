@@ -1,2 +1,2 @@
-# Fortunes
-Source code for my fortune telling service
+# donate.squi.live
+Source code for my donation service
