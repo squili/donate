@@ -31,6 +31,7 @@ type configStructure struct {
 		Webhook string `yaml:"webhook"`
 		Contact string `yaml:"contact"`
 	} `yaml:"discord"`
+	Email string `yaml:"email"`
 }
 
 func loadConfig() configStructure {
@@ -53,6 +54,7 @@ func loadTemplate(name string) *template.Template {
 
 var templateCheckout = loadTemplate("checkout")
 var templateRedirect = loadTemplate("redirect")
+var templatePrivacy = loadTemplate("privacy")
 
 type genericError struct {
 	Error string `json:"error"`
@@ -152,8 +154,6 @@ func endpointSessionCreate(w http.ResponseWriter, req *http.Request) {
 		log.Printf("Failed creating session: %v\n", err)
 		return
 	}
-
-	log.Printf("Created new checkout session for %v\n", req.RemoteAddr)
 
 	data, _ := json.Marshal(sessionCreateResponse{
 		SessionID: session.ID,
@@ -274,6 +274,29 @@ func (e *staticTemplateExecuter) ServeHTTP(w http.ResponseWriter, req *http.Requ
 	}
 }
 
+type staticPageExecuter struct {
+	data []byte
+}
+
+func newStaticPageExecuter(name string) *staticPageExecuter {
+	data, err := ioutil.ReadFile("static/" + name + ".html")
+	if err != nil {
+		log.Panicf("Failed reading file: %v", err)
+	}
+	return &staticPageExecuter{
+		data: data,
+	}
+}
+
+func (e *staticPageExecuter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	w.WriteHeader(200)
+	w.Header().Set("Content-Type", "text/html")
+	_, err := w.Write(e.data)
+	if err != nil {
+		log.Printf("Failed writing response: %v\n", err)
+	}
+}
+
 func main() {
 	stripe.Key = config.Key.Secret
 	http.HandleFunc("/session", endpointSessionCreate)
@@ -292,6 +315,10 @@ func main() {
 		"Title":        "Success",
 		"Message":      "Thanks for the donation!",
 	}))
+	http.Handle("/privacy", newStaticTemplateExecuter(templatePrivacy, map[string]string{
+		"Email": config.Email,
+	}))
+	http.Handle("/refunds", newStaticPageExecuter("refunds"))
 
 	log.Printf("Listening on %s\n", config.Host.Domain)
 	log.Fatal(http.ListenAndServe("localhost:"+config.Host.Port, nil))
