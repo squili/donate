@@ -1,4 +1,4 @@
-module git.squi.live/squili/fortunes
+module git.squi.live/squili/donate.squi.live
 
 go 1.15
 
